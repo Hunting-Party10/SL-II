@@ -7,13 +7,13 @@ tabletail () {
 		echo -n "-"
 		i=$((i+1))
 	done
-	echo		
+	echo
 }
 
-tablehead () { 
+tablehead () {
 	tabletail
-	echo "|Roll  |   Name   | Age  |Marks |" 
-	tabletail	
+	echo "|Roll  |   Name   | Age  |Marks |"
+	tabletail
 }
 
 echo -n "Enter Name of Employee Database:"
@@ -28,10 +28,15 @@ do
 
 	1)
 		echo -e "Inserting Record\n"
+		flag=0
+		while [ $flag -eq 0 ]
+		do
+			echo -n "Enter Roll Number:"
+			read roll
+			grep "^$((roll))" -q $filename.txt && echo "Record Already Exists" || flag=1
+		done
 		echo -n "Enter Name:"
 		read name
-		echo -n "Enter Roll Number:"
-		read roll
 		echo -n "Enter Age:"
 		read age
 		echo -n "Enter Marks:"
@@ -51,23 +56,20 @@ do
 	3)
 		echo -n "Enter Roll Number to be searched:"
 		read r
-		grep "^$((r))" -q $filename.txt && echo "Record found" || echo "Record not found"
-		count=$(ls -l | grep "^$((r))" -q $filename.txt)
-		result=$(ls -l | grep "^$((r))" $filename.txt)
-		if [ $count -eq 0 ]
+		flag=0
+		grep "^$((r))" -q $filename.txt && flag=1 || flag=0
+		if [ $flag -eq 0 ]
 		then
 			echo "Record Not Found"
 		else
+			result=$(ls -l | grep "^$((r))" $filename.txt)
 			tablehead
 			IFS=' '
 			read -a line <<< "$result"
 			printf "|%6s|%10s|%6d|%6d|\n" "${line[0]}" "${line[1]}" "${line[2]}" "${line[3]}"
 			tabletail
 		fi
-		
 
-		
-		
 		;;
 	4)
 		echo -n "Enter Roll Number to be modified:"
@@ -81,20 +83,20 @@ do
 		echo -n "Enter new Marks:"
 		read marks
 		echo -e "$r $name $age $marks" >> $filename.txt
-		
+
 		;;
 
-	5)	
+	5)
 		echo -n "Enter Roll Number to be deleted:"
 		read r
 		grep "^$((r))" -q $filename.txt && echo "Found Record, Deleting" || echo "Could not find Record"
 		sed -i "/^$((r))/d" $filename.txt
-		
+
 		;;
-	
+
 	6)
 		echo "Exit";;
-		
+
 	*)echo "Invalid Input"
 	esac
 done
