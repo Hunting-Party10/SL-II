@@ -46,8 +46,9 @@ void display(int a[], int n)
 
 int main()
 {
+  printf("Demonstrating Orphan State\n");
   int n1,n2;
-  printf("Enter number of element for the Parent Process:");
+  printf("Enter number of element for the Parent Process[%d]:",getpid());
   scanf("%d",&n1);
   int i,*a1,*a2;
   a1 = malloc(n1*sizeof(int));
@@ -57,7 +58,7 @@ int main()
   }
   printf("\n\nEntered Elements are :");
   display(a1,n1);
-  printf("\nEnter number of element for the Child Process:");
+  printf("\nEnter number of element for the Child Process[%d]:",getpid());
   scanf("%d",&n2);
   a2 = malloc(n2*sizeof(int));
   for ( i = 0; i < n2; i++) {
@@ -75,12 +76,10 @@ int main()
     display(a1,n1);
     printf("Parent Process starting Sorting[%d]\n",getpid());
     quickSort(a1,0,n1-1);
-    printf("Parent Process waiting for child Process to complete Sorting[%d]\n\n",getpid());
-    pid_t completed = wait(NULL);
-    printf("Child Process [%d] has completed\n\n",completed);
+    printf("Parent Process has completed Sorting[%d]",getpid() );
     printf("Parent Process Result: ");
     display(a1,n1);
-    printf("Parent Process [%d] has completed\n\n",getpid());
+    printf("Parent Process [%d] has completed sneding child process into Orphan state\n\n",getpid());
     return 0;
   }
   else
@@ -93,6 +92,8 @@ int main()
     printf("Child Process Result: ");
     display(a2,n2);
     printf("\n\n\n");
+    sleep(15);
+    printf("New Parent ID:[%d]\n",getppid());
     return 0;
   }
 }

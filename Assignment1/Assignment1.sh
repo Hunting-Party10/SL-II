@@ -2,7 +2,7 @@
 
 tabletail () {
 	i=0
-	while [ $i -lt 33 ]
+	while [ $i -lt 48 ]
 	do
 		echo -n "-"
 		i=$((i+1))
@@ -12,7 +12,7 @@ tabletail () {
 
 tablehead () {
 	tabletail
-	echo "|Roll  |   Name   | Age  |Marks |"
+	echo "|Roll  |           Name          | Age  |Marks |"
 	tabletail
 }
 
@@ -41,17 +41,25 @@ do
 		read age
 		echo -n "Enter Marks:"
 		read marks
-		echo -e "$roll $name $age $marks" >> $filename.txt
+		echo -e "$roll|$name|$age|$marks" >> $filename.txt
 		;;
 
 	2)
-		echo "Displaying db"
-		tablehead
-		while read -a line
-		do
-			printf "|%6s|%10s|%6d|%6d|\n" "${line[0]}" "${line[1]}" "${line[2]}" "${line[3]}"
-			tabletail
-		done < "$filename.txt"
+
+
+		if 	[[ -s "$filename.txt" ]]; then
+			echo "Displaying db"
+			tablehead
+			IFS='|'
+			while read -a line
+			do
+				printf "|%6s|%25s|%6d|%6d|\n" "${line[0]}" "${line[1]}" "${line[2]}" "${line[3]}"
+				tabletail
+			done < "$filename.txt"
+		else
+			echo "Database is Empty"
+		fi
+
 		;;
 	3)
 		echo -n "Enter Roll Number to be searched:"
@@ -64,9 +72,9 @@ do
 		else
 			result=$(ls -l | grep "^$((r))" $filename.txt)
 			tablehead
-			IFS=' '
+			IFS='|'
 			read -a line <<< "$result"
-			printf "|%6s|%10s|%6d|%6d|\n" "${line[0]}" "${line[1]}" "${line[2]}" "${line[3]}"
+			printf "|%6s|%25s|%6d|%6d|\n" "${line[0]}" "${line[1]}" "${line[2]}" "${line[3]}"
 			tabletail
 		fi
 
@@ -75,15 +83,14 @@ do
 		echo -n "Enter Roll Number to be modified:"
 		read r
 		grep "^$((r))" -q $filename.txt && echo "Record Found,Modifying" || echo "Record not found"
-		sed -i "/^$((r))/d" $filename.txt
+		
 		echo -n "Enter New Name:"
 		read name
 		echo -n "Enter new Age:"
 		read age
 		echo -n "Enter new Marks:"
 		read marks
-		echo -e "$r $name $age $marks" >> $filename.txt
-
+		sed -i.bak "s/^$((r))/$r|$name|$age|$marks/g" $filename.txt
 		;;
 
 	5)
