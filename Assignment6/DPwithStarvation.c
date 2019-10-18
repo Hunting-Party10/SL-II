@@ -10,6 +10,8 @@ confirm its accuracy
 
 But this Solution does lead to starvation
 
+time is in seconds
+
 Output for me was
 For Philosopher 1 , Avg Waiting time is = 0
 For Philosopher 2 , Avg Waiting time is = 1
@@ -101,7 +103,7 @@ void *simulateDPP(void *args)
 int main(int argc, char const *argv[])
 {
 	pthread_t dpp_id;
-	printf("Starting Dining Philosophers Problem\nThis Solution is prone to deadlock\n\n");
+	printf("Starting Dining Philosophers Problem\n\n");
 	init();	
 	pthread_create(&dpp_id,NULL,simulateDPP,NULL);
 	pthread_join(dpp_id,NULL);

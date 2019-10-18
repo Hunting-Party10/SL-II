@@ -14,6 +14,7 @@ typedef struct Philosopher
 {
 	int number;
 	pthread_t philosopher_id;
+	float avg_waiting;
 }Philosopher;
 
 void init()
@@ -49,7 +50,7 @@ void *simulateDPP(void *args)
 int main(int argc, char const *argv[])
 {
 	pthread_t dpp_id;
-	printf("Starting Dining Philosophers Problem\nThis Solution is prone to deadlock\n\n");
+	printf("Starting Dining Philosophers Problem\n");
 	init();	
 	pthread_create(&dpp_id,NULL,simulateDPP,NULL);
 	pthread_join(dpp_id,NULL);
