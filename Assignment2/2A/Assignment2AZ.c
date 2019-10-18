@@ -77,7 +77,7 @@ int main()
     printf("Parent Process starting Sorting[%d]\n",getpid());
     quickSort(a1,0,n1-1);
     printf("Parent Process waiting for child Process to complete Sorting[%d] (Parent goes into sleep)\n\n",getpid());
-    sleep(15);
+    sleep(30);
     pid_t completed = wait(NULL);
     printf("Child Process [%d] has completed\n\n",completed);
     printf("Parent Process Result: ");
