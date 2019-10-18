@@ -43,7 +43,7 @@ void *start(void *args)
 		printf("Philosopher %d is picking up left chopstick\n",p->number);
 		pthread_mutex_lock(chopsticks + p->number -1);
 		//sleep(1); UN comment this to ensure a deadlock happens
-		printf("Philosopher %d is picking up left chopstick\n",p->number);
+		printf("Philosopher %d is picking up right chopstick\n",p->number);
 		pthread_mutex_lock(chopsticks + (p->number)%OBJECTS );
 		printf("Philosopher %d is eating\n",p->number);
 		printf("Philosopher %d has finished\n",p->number);
