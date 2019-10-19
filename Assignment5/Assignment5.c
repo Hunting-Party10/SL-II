@@ -4,41 +4,51 @@
 #include<pthread.h>
 #include<semaphore.h>
 
+
+sem_t writer_semaphore;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 int read_limit = 0,readcnt = 0;
 
 void *readfile(void *args)
 {
-	if (readcnt == 0){
-		printf("No readers currently,trying to lock mutex\n\n");
-		while(pthread_mutex_lock(&mutex) != 0);
-	}
-	readcnt++;
-	//read
-	printf("Reading..\n\n");
-	sleep(3);
-	readcnt--;
-	if(readcnt == 0){
+	printf("Waiting to check condition\n");
+	pthread_mutex_lock(&mutex);
+	if (readcnt == 0)
+	{
+		readcnt++;
 		pthread_mutex_unlock(&mutex);
-		printf("No readers detected,Unlocking Mutex\n");
-		return(void *)0;
+		printf("No readers Present,trying to lock semaphore\n");
+		sem_wait(&writer_semaphore);
 	}
-	else{
-		printf("Some readers are reading,Exiting without unlocking mutex\n");
-		pthread_exit(NULL);
-		
+	else
+	{
+		readcnt++;
+		pthread_mutex_unlock(&mutex);
 	}
+	printf("Condition Checked\nReading.\n");
+
+	printf("trying to decrement reader count\n");
+	pthread_mutex_lock(&mutex);
+	readcnt--;
+	printf("Reader count decremented\n");
+
+
+	if (readcnt == 0)
+	{
+		printf("No readers detected, Releasing all locks\n");
+		sem_post(&writer_semaphore);
+		printf("Locks Released\n");
+	}
+	pthread_mutex_unlock(&mutex);
 }
 
 void *writefile(void *args)
 {
-	while(pthread_mutex_lock(&mutex) != 0);
-	//write
+	printf("Writer waiting\n");
+	sem_wait(&writer_semaphore);
 	printf("Writing\n");
-	sleep(5);
-	printf("Writing Complete Unlocking Mutex\n");
-	pthread_mutex_unlock(&mutex);
-	return(void *) 0;
+	sem_post(&writer_semaphore);
+	printf("Writer exiting\n");
 }
 
 void *reader(void *args)
@@ -47,13 +57,15 @@ void *reader(void *args)
 	pthread_t *thread_id = malloc(sizeof(pthread_t) * *(int *)args);
 	for (int i = 0; i < *(int *)args; ++i)
 		thread_id[i] = -1;
-	while(read_limit <= 50)
+	while(read_limit <= 10)
 	{
 		if (count < *(int *)args)
 		{
 			for (int i = 0; i < *(int *)args; ++i){
 				if (thread_id[i] == -1){
+					printf("Reader Created\n");
 					pthread_create((thread_id +i),NULL,&readfile,NULL);
+
 				}
 			}
 		}
@@ -73,12 +85,13 @@ void *writer(void * args)
 	pthread_t *thread_id = malloc(sizeof(pthread_t) * *(int *)args);
 	for (int i = 0; i < *(int *)args; ++i)
 		thread_id[i] = -1;
-	while(read_limit <= 50)
+	while(read_limit <= 10)
 	{
 		if (count < *(int *)args)
 		{
 			for (int i = 0; i < *(int *)args; ++i){
 				if (thread_id[i] == -1){
+					printf("Writer Created\n");
 					pthread_create((thread_id +i),NULL,&writefile,NULL);
 				}
 			}
@@ -100,6 +113,7 @@ int main(int argc, char const *argv[])
 	printf("Enter Number of Writer:");
 	scanf("%d",&w);
 	pthread_t c_id,p_id;
+	sem_init(&writer_semaphore,0,1);
 	pthread_create(&p_id,NULL,&reader,&r);
 	pthread_create(&c_id,NULL,&writer,&w);
 	pthread_join(p_id,NULL);
